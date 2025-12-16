@@ -5,3 +5,4 @@ export {
   getAvatarEmoji,
   getAvatarSrc,
 } from "./avatars";
+export { MOCK_USERS } from "./mockUsers";
