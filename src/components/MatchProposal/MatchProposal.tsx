@@ -4,7 +4,6 @@ import type { MatchResult } from "../../utils";
 
 interface MatchProposalProps {
   matchResult: MatchResult;
-  currentUserName: string;
   onNext?: () => void;
   onBack?: () => void;
   totalCandidates: number;
@@ -13,25 +12,16 @@ interface MatchProposalProps {
 
 export function MatchProposal({
   matchResult,
-  currentUserName,
   onNext,
   onBack,
   totalCandidates,
   currentIndex,
 }: MatchProposalProps) {
-  const { user, similarity, commonInterests } = matchResult;
+  const { user, similarity } = matchResult;
   const matchPercentage = Math.round((similarity / 8) * 100); // 8 = liczba przedmiotów
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center space-y-6 py-4 animate-fade-in-up">
-      {/* Nagłówek */}
-      <div className="space-y-1">
-        <p className="text-sm text-text-dark/60">
-          Propozycja {currentIndex + 1} z {totalCandidates}
-        </p>
-        <h2 className="text-xl text-pink-dark">Twoja najlepsza para! 💕</h2>
-      </div>
-
       {/* Karta z sylwetką */}
       <div className="relative">
         {/* Dekoracyjne serduszka */}
@@ -78,13 +68,11 @@ export function MatchProposal({
         </div>
       </div>
 
-      {/* Wspólne zainteresowania */}
-      <div className="bg-white/50 rounded-xl p-4 max-w-xs">
-        <p className="text-sm text-text-dark/70 mb-2">
-          {similarity} wspólnych zainteresowań z {currentUserName}:
-        </p>
+      {/* Zainteresowania użytkownika */}
+      <div className="bg-white/50 rounded-xl p-4">
+        <p className="text-sm text-text-dark/70 mb-2">Zainteresowania:</p>
         <div className="flex flex-wrap gap-2 justify-center">
-          {commonInterests.map((id) => {
+          {user.interests.map((id) => {
             const subject = getSubjectById(id);
             return subject ? (
               <span
@@ -96,19 +84,13 @@ export function MatchProposal({
               </span>
             ) : null;
           })}
-          {commonInterests.length === 0 && (
+          {user.interests.length === 0 && (
             <span className="text-text-dark/50 text-sm italic">
-              Brak wspólnych zainteresowań
+              Brak zainteresowań
             </span>
           )}
         </div>
       </div>
-
-      {/* Wskazówka */}
-      <p className="text-sm text-text-dark/50 max-w-xs">
-        Zobacz po prawej stronie jak obliczyliśmy dopasowanie przy użyciu
-        operacji na macierzach! 📊
-      </p>
 
       {/* Nawigacja */}
       <div className="flex gap-4 mt-4">

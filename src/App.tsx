@@ -1,19 +1,28 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Header, LeftColumn, RightColumn } from "./components/Layout";
-import { UserMatrix } from "./components/Matrix";
+import { MatchProposal } from "./components/MatchProposal";
+import { SimilarityMatrix, UserMatrix } from "./components/Matrix";
 import { UserForm } from "./components/UserForm";
 import { MOCK_USERS } from "./data";
+import { getSortedMatches } from "./utils";
 
 import type { User } from "./types";
-type AppStep = "register" | "welcome";
+type AppStep = "register" | "welcome" | "matching";
 
 function App() {
   const [step, setStep] = useState<AppStep>("register");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
 
   // Wszyscy użytkownicy = mock + aktualny
   const allUsers = currentUser ? [...MOCK_USERS, currentUser] : MOCK_USERS;
+
+  // Oblicz dopasowania gdy mamy użytkownika
+  const matchResults = useMemo(() => {
+    if (!currentUser) return [];
+    return getSortedMatches(currentUser, allUsers);
+  }, [currentUser, allUsers]);
 
   const handleAddUser = (user: User) => {
     setCurrentUser(user);
@@ -21,8 +30,20 @@ function App() {
   };
 
   const handleStartMatching = () => {
-    // TODO: Przejście do następnego kroku (matching/swipe)
-    console.log("Start matching!");
+    setCurrentMatchIndex(0);
+    setStep("matching");
+  };
+
+  const handleNextMatch = () => {
+    if (currentMatchIndex < matchResults.length - 1) {
+      setCurrentMatchIndex((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevMatch = () => {
+    if (currentMatchIndex > 0) {
+      setCurrentMatchIndex((prev) => prev - 1);
+    }
   };
 
   return (
@@ -68,16 +89,35 @@ function App() {
                 </button>
               </div>
             )}
+
+            {step === "matching" && currentUser && matchResults.length > 0 && (
+              <MatchProposal
+                key="matching"
+                matchResult={matchResults[currentMatchIndex]}
+                onNext={handleNextMatch}
+                onBack={handlePrevMatch}
+                totalCandidates={matchResults.length}
+                currentIndex={currentMatchIndex}
+              />
+            )}
           </LeftColumn>
 
           {/* PRAWA KOLUMNA */}
-          <RightColumn title="Macierz Zainteresowań">
-            {step === "register" ? (
+          <RightColumn
+            title={
+              step === "matching"
+                ? "Macierz Podobieństwa"
+                : "Macierz Zainteresowań"
+            }
+          >
+            {step === "register" && (
               <div className="text-center text-text-dark/60 py-12">
                 <p className="text-4xl mb-4">📊</p>
                 <p>Wypełnij formularz, aby zobaczyć macierz</p>
               </div>
-            ) : (
+            )}
+
+            {step === "welcome" && (
               <div className="space-y-4">
                 <p className="text-sm text-text-dark/70">
                   Macierz pokazuje zainteresowania wszystkich użytkowników.
@@ -90,6 +130,14 @@ function App() {
                   highlightUserId={currentUser?.id}
                 />
               </div>
+            )}
+
+            {step === "matching" && currentUser && matchResults.length > 0 && (
+              <SimilarityMatrix
+                users={allUsers}
+                currentUserId={currentUser.id}
+                highlightedUserId={matchResults[currentMatchIndex].user.id}
+              />
             )}
           </RightColumn>
         </div>
