@@ -4,82 +4,100 @@ import type { User } from "../../types";
 
 interface UserMatrixProps {
   users: User[];
-  highlightUserId?: string; // podświetl nowego użytkownika
+  highlightUserId?: string;
 }
 
 export function UserMatrix({ users, highlightUserId }: UserMatrixProps) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr>
-            <th className="sticky left-0 bg-white/90 px-3 py-2 text-left font-semibold text-text-dark border-b-2 border-pink-medium/30">
-              Użytkownik
-            </th>
-            {SUBJECTS.map((subject) => (
-              <th
-                key={subject.id}
-                className="px-2 py-2 text-center font-medium text-text-dark/70 border-b-2 border-pink-medium/30 min-w-[40px]"
-                title={subject.name}
-              >
-                <span className="text-lg">{subject.emoji}</span>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user, index) => {
+    <div className="space-y-4">
+      {/* Macierz z nawiasami */}
+      <div className="flex items-stretch justify-center">
+        {/* Nazwy użytkowników */}
+        <div className="flex flex-col justify-end pr-2 text-right">
+          {/* Pusta przestrzeń nad nazwami (na wysokość emoji) */}
+          <div className="h-8" />
+          {users.map((user) => {
             const isHighlighted = user.id === highlightUserId;
             return (
-              <tr
+              <div
                 key={user.id}
                 className={`
-                  transition-all duration-300
-                  ${
-                    isHighlighted
-                      ? "bg-pink-light"
-                      : index % 2 === 0
-                      ? "bg-white/30"
-                      : "bg-white/50"
-                  }
+                  h-8 flex items-center justify-end text-sm font-medium whitespace-nowrap
+                  ${isHighlighted ? "text-pink-dark" : "text-text-dark"}
                 `}
               >
-                <td
-                  className={`
-                    sticky left-0 px-3 py-2 font-medium whitespace-nowrap
-                    ${
-                      isHighlighted
-                        ? "bg-pink-light text-pink-dark"
-                        : "bg-white/90 text-text-dark"
-                    }
-                  `}
-                >
-                  {user.name}
-                  {isHighlighted && <span className="ml-1">✨</span>}
-                </td>
-                {SUBJECTS.map((subject) => {
-                  const hasInterest = user.interests.includes(subject.id);
-                  return (
-                    <td
-                      key={subject.id}
-                      className={`
-                        px-2 py-2 text-center font-mono
-                        ${
-                          hasInterest
-                            ? "text-pink-dark font-bold"
-                            : "text-text-dark/30"
-                        }
-                      `}
-                    >
-                      {hasInterest ? "1" : "0"}
-                    </td>
-                  );
-                })}
-              </tr>
+                {user.name}
+                {isHighlighted && <span className="ml-1">✨</span>}
+              </div>
             );
           })}
-        </tbody>
-      </table>
+        </div>
+
+        {/* Lewy nawias */}
+        <div className="flex flex-col justify-end">
+          {/* Pusta przestrzeń na wysokość emoji */}
+          <div className="h-8" />
+          <div className="flex-1 w-3 border-l-3 border-t-3 border-b-3 border-pink-dark rounded-l-md" />
+        </div>
+
+        {/* Zawartość macierzy z nagłówkiem */}
+        <div className="flex flex-col">
+          {/* Nagłówek z emoji przedmiotów */}
+          <div className="flex h-8 items-end pb-1 px-2">
+            {SUBJECTS.map((subject) => (
+              <div
+                key={subject.id}
+                className="w-8 text-center text-sm"
+                title={subject.name}
+              >
+                {subject.emoji}
+              </div>
+            ))}
+          </div>
+
+          {/* Wartości macierzy */}
+          <div className="flex flex-col bg-white/30 px-2">
+            {users.map((user) => {
+              const isHighlighted = user.id === highlightUserId;
+              return (
+                <div
+                  key={user.id}
+                  className={`
+                    flex h-8 items-center
+                    ${isHighlighted ? "bg-pink-light/50" : ""}
+                  `}
+                >
+                  {SUBJECTS.map((subject) => {
+                    const hasInterest = user.interests.includes(subject.id);
+                    return (
+                      <div
+                        key={subject.id}
+                        className={`
+                          w-8 text-center font-mono text-sm
+                          ${
+                            hasInterest
+                              ? "text-pink-dark font-bold"
+                              : "text-text-dark/30"
+                          }
+                        `}
+                      >
+                        {hasInterest ? "1" : "0"}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Prawy nawias */}
+        <div className="flex flex-col justify-end">
+          {/* Pusta przestrzeń na wysokość emoji */}
+          <div className="h-8" />
+          <div className="flex-1 w-3 border-r-3 border-t-3 border-b-3 border-pink-dark rounded-r-md" />
+        </div>
+      </div>
 
       {/* Legenda */}
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-text-dark/60">
