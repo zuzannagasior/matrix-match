@@ -1,6 +1,6 @@
-import { SUBJECTS } from "../data";
+import type { Swipe, User } from "../types";
 
-import type { User } from "../types";
+import { SUBJECTS } from "../data";
 
 /**
  * Wynik dopasowania - użytkownik z jego wynikiem podobieństwa
@@ -125,4 +125,71 @@ export function createSimilarityMatrix(users: User[]): number[][] {
   }
 
   return matrix;
+}
+
+/**
+ * Sprawdza czy istnieje swipe od jednego użytkownika do drugiego
+ */
+export function getSwipe(
+  swipes: Swipe[],
+  fromId: string,
+  toId: string
+): Swipe | undefined {
+  return swipes.find((s) => s.visitorId === fromId && s.targetId === toId);
+}
+
+/**
+ * Sprawdza czy jest match między dwoma użytkownikami
+ * Match występuje gdy oba warunki są spełnione: L[i][j] = 1 AND L[j][i] = 1
+ */
+export function isMatch(
+  swipes: Swipe[],
+  user1Id: string,
+  user2Id: string
+): boolean {
+  const swipe1 = getSwipe(swipes, user1Id, user2Id);
+  const swipe2 = getSwipe(swipes, user2Id, user1Id);
+  return swipe1?.liked === true && swipe2?.liked === true;
+}
+
+/**
+ * Generuje losowe swipes od innych użytkowników do aktualnego użytkownika
+ * Trzeci użytkownik (index 2) zawsze lubi aktualnego użytkownika - gwarantuje match
+ */
+export function generateMockSwipes(
+  mockUsers: User[],
+  currentUserId: string,
+  guaranteeMatchAtIndex: number = 2
+): Swipe[] {
+  const swipes: Swipe[] = [];
+
+  mockUsers.forEach((user, index) => {
+    // Trzeci użytkownik (lub wskazany index) zawsze lubi
+    const liked = index === guaranteeMatchAtIndex ? true : Math.random() > 0.5;
+
+    swipes.push({
+      visitorId: user.id,
+      targetId: currentUserId,
+      liked,
+      timestamp: Date.now() - Math.random() * 86400000,
+    });
+  });
+
+  return swipes;
+}
+
+/**
+ * Tworzy nowy swipe
+ */
+export function createSwipe(
+  visitorId: string,
+  targetId: string,
+  liked: boolean
+): Swipe {
+  return {
+    visitorId,
+    targetId,
+    liked,
+    timestamp: Date.now(),
+  };
 }
