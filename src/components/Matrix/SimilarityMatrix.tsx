@@ -210,7 +210,7 @@ export function SimilarityMatrix({
       {/* Macierz podobieństwa - styl z nawiasami jak UserMatrix */}
       <div className="space-y-4">
         {/* Macierz z nawiasami */}
-        <div className="flex items-stretch justify-center">
+        <div className="flex items-stretch justify-start md:justify-center overflow-x-auto pb-2">
           {/* Nazwy użytkowników (wiersze) */}
           <div className="flex flex-col justify-end pr-2 text-right">
             {/* Pusta przestrzeń nad nazwami (na wysokość nagłówka kolumn) */}

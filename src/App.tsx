@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { Header, LeftColumn, RightColumn } from "./components/Layout";
+import { Header, LeftColumn, MobileSlidePanel, RightColumn } from "./components/Layout";
 import { MatchModal } from "./components/Match";
 import { MatchProposal } from "./components/MatchProposal";
 import { SimilarityMatrix, SwipeMatrix, UserMatrix } from "./components/Matrix";
@@ -45,6 +45,12 @@ function App() {
     return swipes.some((s) => s.visitorId === currentUser?.id);
   }, [swipes, currentUser]);
 
+  // Licznik zmian w panelu (step + swipes) - do animacji kółka na mobile
+  const panelChangeCount = useMemo(() => {
+    const stepValue = step === "register" ? 0 : step === "welcome" ? 1 : 2;
+    return stepValue + swipes.length;
+  }, [step, swipes.length]);
+
   const handleAddUser = useCallback((user: User) => {
     setCurrentUser(user);
     setStep("welcome");
@@ -86,15 +92,22 @@ function App() {
     setMatchedUser(null);
   }, []);
 
+  const handleReset = useCallback(() => {
+    setStep("register");
+    setCurrentUser(null);
+    setSwipes([]);
+    setMatchedUser(null);
+  }, []);
+
   // Obecny kandydat do wyświetlenia w trybie swiping
   const currentCandidate = unswipedResults[0] || null;
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden overflow-y-auto">
       <Header />
 
-      <main className="flex-1 flex flex-col max-w-7xl mx-auto w-full p-6 min-h-0">
-        <div className="flex gap-6 flex-1 min-h-0">
+      <main className="flex-1 flex flex-col max-w-7xl mx-auto w-full p-2 md:p-6 md:min-h-0">
+        <div className="flex gap-2 md:gap-6 flex-1 md:min-h-0">
           {/* LEWA KOLUMNA */}
           <LeftColumn>
             {step === "register" && (
@@ -153,12 +166,75 @@ function App() {
                   Przejrzałeś/aś wszystkie profile. Sprawdź macierz po prawej,
                   aby zobaczyć swoje polubienia!
                 </p>
+                <button
+                  onClick={handleReset}
+                  className="
+                    mt-4 py-3 px-6 rounded-xl font-medium
+                    bg-white border-2 border-pink-dark text-pink-dark
+                    hover:bg-pink-light hover:scale-105 active:scale-95
+                    transition-all duration-300
+                  "
+                >
+                  🔄 Zacznij od początku
+                </button>
               </div>
             )}
           </LeftColumn>
 
-          {/* PRAWA KOLUMNA */}
-          <RightColumn
+          {/* PRAWA KOLUMNA - desktop */}
+          <div className="hidden md:flex flex-1 min-h-0">
+            <RightColumn
+              title={
+                step === "swiping" && hasUserSwiped
+                  ? "Macierz Polubień"
+                  : step === "swiping"
+                  ? "Macierz Podobieństwa"
+                  : "Macierz Zainteresowań"
+              }
+            >
+              {step === "register" && (
+                <div className="text-center text-text-dark/60 py-12">
+                  <p className="text-4xl mb-4">📊</p>
+                  <p>Wypełnij formularz, aby zobaczyć macierz</p>
+                </div>
+              )}
+
+              {step === "welcome" && (
+                <div className="space-y-4">
+                  <p className="text-sm text-text-dark/70">
+                    Macierz pokazuje zainteresowania wszystkich użytkowników.
+                    <br />
+                    <strong>1</strong> = lubi przedmiot, <strong>0</strong> =
+                    nie lubi
+                  </p>
+                  <UserMatrix
+                    users={allUsers}
+                    highlightUserId={currentUser?.id}
+                  />
+                </div>
+              )}
+
+              {step === "swiping" && currentUser && !hasUserSwiped && (
+                <SimilarityMatrix
+                  users={allUsers}
+                  currentUserId={currentUser.id}
+                  highlightedUserId={currentCandidate?.user.id}
+                />
+              )}
+
+              {step === "swiping" && currentUser && hasUserSwiped && (
+                <SwipeMatrix
+                  users={allUsers}
+                  swipes={swipes}
+                  currentUserId={currentUser.id}
+                  highlightedUserId={currentCandidate?.user.id}
+                />
+              )}
+            </RightColumn>
+          </div>
+
+          {/* PRAWA KOLUMNA - mobile (wysuwany panel) */}
+          <MobileSlidePanel
             title={
               step === "swiping" && hasUserSwiped
                 ? "Macierz Polubień"
@@ -166,6 +242,7 @@ function App() {
                 ? "Macierz Podobieństwa"
                 : "Macierz Zainteresowań"
             }
+            changeCount={panelChangeCount}
           >
             {step === "register" && (
               <div className="text-center text-text-dark/60 py-12">
@@ -205,11 +282,11 @@ function App() {
                 highlightedUserId={currentCandidate?.user.id}
               />
             )}
-          </RightColumn>
+          </MobileSlidePanel>
         </div>
       </main>
 
-      <footer className="text-center py-4 text-text-dark/50 text-sm">
+      <footer className="text-center py-2 md:py-4 text-text-dark/50 text-xs md:text-sm px-2">
         <p>
           Projekt edukacyjny SWPS - Macierzowy model procesu dopasowania
           użytkowników w aplikacjach randkowych 💕

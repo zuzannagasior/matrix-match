@@ -23,7 +23,7 @@ export function SubjectMultiSelect({
         Ulubione przedmioty{" "}
         <span className="text-text-dark/50">({value.length} wybrano)</span>
       </label>
-      <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+      <div className="space-y-2 md:max-h-64 md:overflow-y-auto md:pr-2">
         {SUBJECTS.map((subject) => {
           const isSelected = value.includes(subject.id);
           return (
