@@ -2,15 +2,15 @@ import type { Avatar } from "../types";
 
 /**
  * Predefiniowana lista avatarów do wyboru
- * Pliki graficzne należy umieścić w: public/avatars/
+ * Pliki graficzne w: public/avatars/
  */
 export const AVATARS: Avatar[] = [
-  { id: "avatar-1", emoji: "👤", label: "Avatar 1" },
-  { id: "avatar-2", emoji: "👤", label: "Avatar 2" },
-  { id: "avatar-3", emoji: "👤", label: "Avatar 3" },
-  { id: "avatar-4", emoji: "👤", label: "Avatar 4" },
-  { id: "avatar-5", emoji: "👤", label: "Avatar 5" },
-  { id: "avatar-6", emoji: "👤", label: "Avatar 6" },
+  { id: "woman1", emoji: "👩", label: "Kobieta 1" },
+  { id: "woman2", emoji: "👩", label: "Kobieta 2" },
+  { id: "woman3", emoji: "👩", label: "Kobieta 3" },
+  { id: "men1", emoji: "👨", label: "Mężczyzna 1" },
+  { id: "men2", emoji: "👨", label: "Mężczyzna 2" },
+  { id: "men3", emoji: "👨", label: "Mężczyzna 3" },
 ];
 
 /**
@@ -22,10 +22,10 @@ export function getAvatarById(id: string): Avatar | undefined {
 
 /**
  * Pobierz ścieżkę do pliku avatara
- * Pliki powinny być w formacie: public/avatars/{id}.png
+ * Pliki w formacie: public/avatars/{id}.jpg
  */
 export function getAvatarSrc(id: string): string {
-  return `/avatars/${id}.png`;
+  return `/avatars/${id}.jpg`;
 }
 
 /**
