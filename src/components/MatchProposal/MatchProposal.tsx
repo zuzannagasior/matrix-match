@@ -4,18 +4,14 @@ import type { MatchResult } from "../../utils";
 
 interface MatchProposalProps {
   matchResult: MatchResult;
-  onNext?: () => void;
-  onBack?: () => void;
-  totalCandidates: number;
-  currentIndex: number;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
 }
 
 export function MatchProposal({
   matchResult,
-  onNext,
-  onBack,
-  totalCandidates,
-  currentIndex,
+  onSwipeLeft,
+  onSwipeRight,
 }: MatchProposalProps) {
   const { user, similarity } = matchResult;
   const matchPercentage = Math.round((similarity / 8) * 100); // 8 = liczba przedmiotów
@@ -92,30 +88,28 @@ export function MatchProposal({
         </div>
       </div>
 
-      {/* Nawigacja */}
-      <div className="flex gap-4 mt-4">
-        {onBack && currentIndex > 0 && (
-          <button
-            onClick={onBack}
-            className="py-2 px-6 rounded-xl font-medium text-text-dark/70 
-              bg-white/70 border border-pink-medium/30
-              hover:bg-white hover:shadow-md
-              transition-all duration-200"
-          >
-            ← Poprzedni
-          </button>
-        )}
-        {onNext && currentIndex < totalCandidates - 1 && (
-          <button
-            onClick={onNext}
-            className="py-2 px-6 rounded-xl font-medium text-white
-              bg-gradient-romantic shadow-romantic
-              hover:shadow-lg hover:scale-105 active:scale-95
-              transition-all duration-200"
-          >
-            Następny →
-          </button>
-        )}
+      {/* Przyciski Swipe */}
+      <div className="flex gap-8 mt-4">
+        <button
+          onClick={onSwipeLeft}
+          className="w-16 h-16 rounded-full flex items-center justify-center
+            bg-white border-2 border-gray-300 text-3xl
+            hover:border-gray-400 hover:bg-gray-50 hover:scale-110
+            active:scale-95 transition-all duration-200 shadow-md"
+          title="Nie lubię"
+        >
+          ❌
+        </button>
+        <button
+          onClick={onSwipeRight}
+          className="w-16 h-16 rounded-full flex items-center justify-center
+            bg-gradient-romantic text-3xl text-white
+            hover:shadow-lg hover:scale-110
+            active:scale-95 transition-all duration-200 shadow-romantic"
+          title="Lubię"
+        >
+          💚
+        </button>
       </div>
     </div>
   );
