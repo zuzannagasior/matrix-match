@@ -1,4 +1,5 @@
-import { ReactNode, TouchEvent, type, useCallback, useRef, useState } from "react";
+import type { ReactNode, TouchEvent } from "react";
+import { useCallback, useRef, useState } from "react";
 
 interface SwipeableCardProps {
   children: ReactNode;
