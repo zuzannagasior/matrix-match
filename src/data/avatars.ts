@@ -25,7 +25,7 @@ export function getAvatarById(id: string): Avatar | undefined {
  * Pliki w formacie: public/avatars/{id}.jpg
  */
 export function getAvatarSrc(id: string): string {
-  return `/avatars/${id}.jpg`;
+  return `${import.meta.env.BASE_URL}avatars/${id}.jpg`;
 }
 
 /**
