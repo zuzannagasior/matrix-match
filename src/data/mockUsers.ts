@@ -14,7 +14,7 @@ export const MOCK_USERS: User[] = [
   {
     id: "mock-2",
     name: "Andrzej",
-    avatar: "men1",
+    avatar: "man1",
     interests: ["intro-info", "matematyka", "debaty-tech"],
     createdAt: Date.now() - 86400000 * 4,
   },
@@ -28,7 +28,7 @@ export const MOCK_USERS: User[] = [
   {
     id: "mock-4",
     name: "Tomek",
-    avatar: "men2",
+    avatar: "man2",
     interests: ["intro-info", "debaty-tech", "matematyka", "angielski"],
     createdAt: Date.now() - 86400000 * 2,
   },
@@ -42,7 +42,7 @@ export const MOCK_USERS: User[] = [
   {
     id: "mock-6",
     name: "Michał",
-    avatar: "men3",
+    avatar: "man3",
     interests: [
       "matematyka",
       "intro-info",

@@ -53,9 +53,7 @@ export function MatchModal({ user1, user2, onClose }: MatchModalProps) {
             MATCH! 💕
           </h2>
 
-          <p className="text-text-dark/70">
-            Lubicie się nawzajem!
-          </p>
+          <p className="text-text-dark/70">Lubicie się nawzajem!</p>
 
           {/* Avatary */}
           <div className="flex items-center justify-center gap-4">
@@ -126,4 +124,3 @@ export function MatchModal({ user1, user2, onClose }: MatchModalProps) {
     </div>
   );
 }
-

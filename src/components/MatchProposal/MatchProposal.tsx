@@ -44,7 +44,7 @@ export function MatchProposal({
               <img
                 src={getAvatarSrc(user.avatar)}
                 alt={user.name}
-                className="w-40 h-40 object-cover rounded-full"
+                className="w-full h-full object-cover rounded-full"
                 onError={(e) => {
                   // Fallback do sylwetki gdy brak avatara
                   e.currentTarget.style.display = "none";

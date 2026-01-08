@@ -47,7 +47,7 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
                 <img
                   src={getAvatarSrc(avatar.id)}
                   alt={avatar.label}
-                  className="w-full h-full object-cover object-center p-2"
+                  className="w-full h-full object-cover object-center"
                   onError={() => handleImageError(avatar.id)}
                 />
               )}
