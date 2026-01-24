@@ -3,11 +3,21 @@ import { SUBJECTS } from "../../data";
 interface SubjectMultiSelectProps {
   value: string[];
   onChange: (subjectIds: string[]) => void;
+  label?: string;
+  description?: string;
+  emptyMessage?: string;
+  variant?: "pink" | "purple";
+  required?: boolean;
 }
 
 export function SubjectMultiSelect({
   value,
   onChange,
+  label = "Ulubione przedmioty",
+  description,
+  emptyMessage = "Wybierz przynajmniej jeden przedmiot 💕",
+  variant = "pink",
+  required = true,
 }: SubjectMultiSelectProps) {
   const toggleSubject = (subjectId: string) => {
     if (value.includes(subjectId)) {
@@ -17,13 +27,36 @@ export function SubjectMultiSelect({
     }
   };
 
+  // Kolory w zależności od wariantu
+  const colors = {
+    pink: {
+      selected: "bg-pink-dark text-white shadow-md",
+      hover: "hover:bg-pink-light",
+      checkmark: "bg-white border-white text-pink-dark",
+      border: "border-pink-medium",
+      empty: "text-pink-dark/70",
+    },
+    purple: {
+      selected: "bg-purple-600 text-white shadow-md",
+      hover: "hover:bg-purple-100",
+      checkmark: "bg-white border-white text-purple-600",
+      border: "border-purple-400",
+      empty: "text-purple-600/70",
+    },
+  };
+
+  const colorScheme = colors[variant];
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-text-dark">
-        Ulubione przedmioty{" "}
+        {label}{" "}
         <span className="text-text-dark/50">({value.length} wybrano)</span>
       </label>
-      <div className="space-y-2 md:max-h-64 md:overflow-y-auto md:pr-2">
+      {description && (
+        <p className="text-xs text-text-dark/60">{description}</p>
+      )}
+      <div className="space-y-2 md:overflow-y-auto md:pr-2">
         {SUBJECTS.map((subject) => {
           const isSelected = value.includes(subject.id);
           return (
@@ -32,25 +65,25 @@ export function SubjectMultiSelect({
               type="button"
               onClick={() => toggleSubject(subject.id)}
               className={`
-                w-full flex items-center gap-3 px-4 py-3 rounded-xl
+                w-full flex items-center gap-3 px-4 py-2.5 rounded-xl
                 transition-all duration-200 text-left
                 ${
                   isSelected
-                    ? "bg-pink-dark text-white shadow-md"
-                    : "bg-white/50 text-text-dark hover:bg-pink-light"
+                    ? colorScheme.selected
+                    : `bg-white/50 text-text-dark ${colorScheme.hover}`
                 }
               `}
             >
-              <span className="text-xl">{subject.emoji}</span>
-              <span className="flex-1 font-medium">{subject.name}</span>
+              <span className="text-lg">{subject.emoji}</span>
+              <span className="flex-1 font-medium text-sm">{subject.name}</span>
               <span
                 className={`
-                  w-6 h-6 rounded-full border-2 flex items-center justify-center
+                  w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs
                   transition-all duration-200
                   ${
                     isSelected
-                      ? "bg-white border-white text-pink-dark"
-                      : "border-pink-medium"
+                      ? colorScheme.checkmark
+                      : colorScheme.border
                   }
                 `}
               >
@@ -60,10 +93,8 @@ export function SubjectMultiSelect({
           );
         })}
       </div>
-      {value.length === 0 && (
-        <p className="text-sm text-pink-dark/70">
-          Wybierz przynajmniej jeden przedmiot 💕
-        </p>
+      {required && value.length === 0 && (
+        <p className={`text-sm ${colorScheme.empty}`}>{emptyMessage}</p>
       )}
     </div>
   );

@@ -128,6 +128,153 @@ export function createSimilarityMatrix(users: User[]): number[][] {
 }
 
 /**
+ * Tworzy wektor preferencji dla użytkownika
+ * Wektor ma długość = liczba przedmiotów, wartości 0/1
+ * Reprezentuje czego użytkownik szuka u partnera
+ */
+export function createPreferenceVector(user: User): number[] {
+  return SUBJECTS.map((subject) =>
+    user.preferences?.includes(subject.id) ? 1 : 0
+  );
+}
+
+/**
+ * Oblicza dopasowanie z macierzy M = A × Pᵀ
+ * M[i][j] = jak bardzo cechy użytkownika i pasują do preferencji użytkownika j
+ *
+ * @param userWithFeatures - użytkownik którego cechy sprawdzamy (wiersz z macierzy A)
+ * @param userWithPreferences - użytkownik którego preferencje sprawdzamy (wiersz z macierzy P)
+ * @returns wynik dopasowania
+ */
+export function calculateMatchScore(
+  userWithFeatures: User,
+  userWithPreferences: User
+): number {
+  const features = createInterestVector(userWithFeatures); // cechy użytkownika (wiersz A)
+  const preferences = createPreferenceVector(userWithPreferences); // preferencje (wiersz P)
+
+  // M[i][j] = A[i] · P[j] = suma iloczynów cech i preferencji
+  return dotProduct(features, preferences);
+}
+
+/**
+ * Tworzy macierz dopasowania M = A × Pᵀ
+ * gdzie A = macierz użytkownik-cecha (co mają)
+ *       P = macierz preferencji (czego szukają)
+ *
+ * Wartość M[i][j] = jak bardzo cechy użytkownika i pasują do preferencji użytkownika j
+ *
+ * Interpretacja: M[i][j] mówi "jak atrakcyjny jest user_i dla user_j"
+ */
+export function createMatchMatrix(users: User[]): number[][] {
+  const matrix: number[][] = [];
+
+  for (const userI of users) {
+    const row: number[] = [];
+    for (const userJ of users) {
+      // M[i][j] = A[i] · P[j] = jak cechy user_i pasują do preferencji user_j
+      // Przekątna też obliczamy normalnie, ale w UI będzie wyszarzona
+      row.push(calculateMatchScore(userI, userJ));
+    }
+    matrix.push(row);
+  }
+
+  return matrix;
+}
+
+/**
+ * Oblicza dwustronne dopasowanie między dwoma użytkownikami
+ * Na podstawie macierzy M = A × Pᵀ
+ *
+ * @returns obiekt z wynikami:
+ *   - score_i_to_j: jak user1 pasuje do preferencji user2 (M[1][2])
+ *   - score_j_to_i: jak user2 pasuje do preferencji user1 (M[2][1])
+ *   - mutual: średnia obu wyników (dopasowanie wzajemne)
+ */
+export function calculateBidirectionalMatch(
+  user1: User,
+  user2: User
+): { score_i_to_j: number; score_j_to_i: number; mutual: number } {
+  // M[i][j] = jak cechy user_i pasują do preferencji user_j
+  const score_i_to_j = calculateMatchScore(user1, user2);
+
+  // M[j][i] = jak cechy user_j pasują do preferencji user_i
+  const score_j_to_i = calculateMatchScore(user2, user1);
+
+  // Wzajemne dopasowanie (średnia)
+  const mutual = (score_i_to_j + score_j_to_i) / 2;
+
+  return {
+    score_i_to_j,
+    score_j_to_i,
+    mutual,
+  };
+}
+
+/**
+ * Tworzy macierz dopasowania M = A × Pᵀ
+ * oraz macierze pomocnicze A (użytkownik-cecha) i P (preferencje)
+ *
+ * M[i][j] = jak bardzo cechy użytkownika i pasują do preferencji użytkownika j
+ */
+export function createFullMatchMatrix(users: User[]): {
+  matchMatrix: number[][]; // M = A × Pᵀ
+  userFeatureMatrix: number[][]; // A - macierz użytkownik-cecha
+  preferenceMatrix: number[][]; // P - macierz preferencji
+} {
+  // Budujemy macierz A (użytkownik-cecha)
+  const userFeatureMatrix: number[][] = users.map((user) =>
+    createInterestVector(user)
+  );
+
+  // Budujemy macierz P (preferencje)
+  const preferenceMatrix: number[][] = users.map((user) =>
+    createPreferenceVector(user)
+  );
+
+  // Obliczamy M = A × Pᵀ
+  const matchMatrix: number[][] = [];
+
+  for (let i = 0; i < users.length; i++) {
+    const row: number[] = [];
+    for (let j = 0; j < users.length; j++) {
+      // M[i][j] = A[i] · P[j] (iloczyn skalarny)
+      // Przekątna też obliczamy normalnie, ale w UI będzie wyszarzona
+      row.push(dotProduct(userFeatureMatrix[i], preferenceMatrix[j]));
+    }
+    matchMatrix.push(row);
+  }
+
+  return { matchMatrix, userFeatureMatrix, preferenceMatrix };
+}
+
+/**
+ * Sortuje użytkowników według dopasowania do preferencji aktualnego użytkownika
+ * Używa macierzy M = A × Pᵀ
+ * Sortujemy po M[j][i] - czyli jak bardzo inni pasują do MOICH preferencji
+ */
+export function getSortedMatchesByPreferences(
+  currentUser: User,
+  allUsers: User[]
+): (MatchResult & { matchScore: number })[] {
+  const otherUsers = allUsers.filter((u) => u.id !== currentUser.id);
+
+  const results = otherUsers.map((user) => {
+    const detailed = calculateDetailedSimilarity(currentUser, user);
+    // M[j][i] = jak cechy user pasują do preferencji currentUser
+    const matchScore = calculateMatchScore(user, currentUser);
+
+    return {
+      ...detailed,
+      matchScore,
+    };
+  });
+
+  // Sortujemy malejąco według wyniku dopasowania
+  return results.sort((a, b) => b.matchScore - a.matchScore);
+}
+
+/**
  * Sprawdza czy istnieje swipe od jednego użytkownika do drugiego
  */
 export function getSwipe(

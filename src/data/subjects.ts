@@ -16,6 +16,7 @@ export const SUBJECTS: Subject[] = [
     name: "Wprowadzenie do psychologii społecznej",
     emoji: "👥",
   },
+  { id: 'jezyki_programowania', name: 'Języki programowania', emoji: '💻' },
 ];
 
 /**

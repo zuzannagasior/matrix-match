@@ -12,8 +12,10 @@ export function UserForm({ onSubmit }: UserFormProps) {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState("avatar-1");
   const [interests, setInterests] = useState<string[]>([]);
+  const [preferences, setPreferences] = useState<string[]>([]);
 
-  const isValid = name.trim().length > 0 && interests.length > 0;
+  const isValid =
+    name.trim().length > 0 && interests.length > 0 && preferences.length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +26,7 @@ export function UserForm({ onSubmit }: UserFormProps) {
       name: name.trim(),
       avatar,
       interests,
+      preferences,
       createdAt: Date.now(),
     };
 
@@ -33,10 +36,11 @@ export function UserForm({ onSubmit }: UserFormProps) {
     setName("");
     setAvatar("avatar-1");
     setInterests([]);
+    setPreferences([]);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Imię */}
       <div className="space-y-2">
         <label
@@ -63,8 +67,29 @@ export function UserForm({ onSubmit }: UserFormProps) {
       {/* Avatar */}
       <AvatarPicker value={avatar} onChange={setAvatar} />
 
-      {/* Przedmioty */}
-      <SubjectMultiSelect value={interests} onChange={setInterests} />
+      {/* Moje zainteresowania */}
+      <div className="bg-pink-light/30 rounded-xl p-4">
+        <SubjectMultiSelect
+          value={interests}
+          onChange={setInterests}
+          label="Moje zainteresowania"
+          description="Wybierz przedmioty, które Cię interesują"
+          emptyMessage="Wybierz przynajmniej jeden przedmiot 💕"
+          variant="pink"
+        />
+      </div>
+
+      {/* Preferencje partnera */}
+      <div className="bg-purple-100/30 rounded-xl p-4">
+        <SubjectMultiSelect
+          value={preferences}
+          onChange={setPreferences}
+          label="Szukam kogoś, kto lubi..."
+          description="Jakich zainteresowań szukasz u partnera?"
+          emptyMessage="Wybierz przynajmniej jeden przedmiot 🔍"
+          variant="purple"
+        />
+      </div>
 
       {/* Submit */}
       <button

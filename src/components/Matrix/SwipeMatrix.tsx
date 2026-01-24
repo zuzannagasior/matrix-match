@@ -45,13 +45,9 @@ export function SwipeMatrix({
   };
 
   // Pobierz klasy CSS dla komórki
-  const getCellClasses = (value: boolean | null, isMatchCell: boolean) => {
+  const getCellClasses = (value: boolean | null) => {
     const baseClasses =
       "w-12 h-10 flex items-center justify-center text-sm font-mono transition-all duration-300";
-
-    if (isMatchCell) {
-      return `${baseClasses} bg-red-heart text-white font-bold`;
-    }
 
     if (value === null) {
       return `${baseClasses} bg-white/50 text-gray-400`;
@@ -97,7 +93,7 @@ export function SwipeMatrix({
           <span>= nie ocenił</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="w-4 h-4 bg-red-heart rounded"></span>
+          <span className="w-8 h-4 border-2 border-red-heart rounded-full"></span>
           <span>= MATCH! 💕</span>
         </div>
       </div>
@@ -110,11 +106,11 @@ export function SwipeMatrix({
               <th className="px-3 py-2 text-left text-sm font-medium text-text-dark/70">
                 Użytkownik
               </th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-pink-dark">
-                {currentUser.name} → Oni
-              </th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-purple-600">
-                Oni → {currentUser.name}
+              <th colSpan={2} className="px-3 py-2 text-center text-sm font-medium">
+                <div className="flex justify-center gap-6">
+                  <span className="text-pink-dark w-12 text-center">{currentUser.name} → Oni</span>
+                  <span className="text-purple-600 w-12 text-center">Oni → {currentUser.name}</span>
+                </div>
               </th>
               <th className="px-3 py-2 text-center text-sm font-medium text-text-dark/70">
                 Status
@@ -135,18 +131,31 @@ export function SwipeMatrix({
                   <td className="px-3 py-2 text-sm font-medium text-text-dark/80">
                     {user.name}
                   </td>
-                  <td className="px-3 py-1">
-                    <div className="flex justify-center">
-                      <span className={getCellClasses(mySwipe, matched)}>
-                        {renderCellValue(mySwipe)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-3 py-1">
-                    <div className="flex justify-center">
-                      <span className={getCellClasses(theirSwipe, matched)}>
-                        {renderCellValue(theirSwipe)}
-                      </span>
+                  <td colSpan={2} className="px-3 py-1">
+                    <div className="flex justify-center gap-6 relative">
+                      {/* Elipsa dla matcha - pozycjonowana absolutnie */}
+                      {matched && (
+                        <div 
+                          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                        >
+                          <div 
+                            className="border-2 border-red-heart rounded-full"
+                            style={{ width: '160px', height: '44px' }}
+                          />
+                        </div>
+                      )}
+                      {/* Komórka: Ja → Oni */}
+                      <div className="flex justify-center">
+                        <span className={getCellClasses(mySwipe)}>
+                          {renderCellValue(mySwipe)}
+                        </span>
+                      </div>
+                      {/* Komórka: Oni → Ja */}
+                      <div className="flex justify-center">
+                        <span className={getCellClasses(theirSwipe)}>
+                          {renderCellValue(theirSwipe)}
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td className="px-3 py-2 text-center">

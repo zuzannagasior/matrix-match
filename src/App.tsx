@@ -3,13 +3,13 @@ import { useCallback, useMemo, useState } from "react";
 import { Header, LeftColumn, MobileSlidePanel, RightColumn } from "./components/Layout";
 import { MatchModal } from "./components/Match";
 import { MatchProposal } from "./components/MatchProposal";
-import { SimilarityMatrix, SwipeMatrix, UserMatrix } from "./components/Matrix";
+import { CombinedMatrix, PreferenceMatrix, SwipeMatrix, UserMatrix } from "./components/Matrix";
 import { UserForm } from "./components/UserForm";
 import { MOCK_USERS } from "./data";
-import { createSwipe, generateMockSwipes, getSortedMatches, isMatch } from "./utils";
+import { createSwipe, generateMockSwipes, getSortedMatchesByPreferences, isMatch } from "./utils";
 
 import type { Swipe, User } from "./types";
-type AppStep = "register" | "welcome" | "swiping";
+type AppStep = "register" | "welcome" | "preferences" | "swiping";
 
 function App() {
   const [step, setStep] = useState<AppStep>("register");
@@ -23,10 +23,11 @@ function App() {
     [currentUser]
   );
 
-  // Oblicz dopasowania gdy mamy użytkownika
+  // Oblicz dopasowania według macierzy M = A × Pᵀ
+  // Sortujemy po M[j][i] - czyli jak cechy innych pasują do MOICH preferencji
   const matchResults = useMemo(() => {
     if (!currentUser) return [];
-    return getSortedMatches(currentUser, allUsers);
+    return getSortedMatchesByPreferences(currentUser, allUsers);
   }, [currentUser, allUsers]);
 
   // Filtruj tylko nieocenionych użytkowników
@@ -54,6 +55,10 @@ function App() {
   const handleAddUser = useCallback((user: User) => {
     setCurrentUser(user);
     setStep("welcome");
+  }, []);
+
+  const handleShowPreferences = useCallback(() => {
+    setStep("preferences");
   }, []);
 
   const handleStartSwiping = useCallback(() => {
@@ -130,14 +135,41 @@ function App() {
                   zainteresowania wyglądają w macierzy!
                 </p>
                 <p className="text-text-dark/60 text-sm">
-                  Gotowy/a poznać kogoś o podobnych zainteresowaniach?
+                  W następnym kroku zobaczysz macierz preferencji.
+                </p>
+                <button
+                  onClick={handleShowPreferences}
+                  className="
+                    mt-4 py-4 px-8 rounded-xl font-semibold text-lg
+                    bg-gradient-romantic text-white shadow-romantic
+                    hover:shadow-lg hover:scale-105 active:scale-95
+                    transition-all duration-300
+                  "
+                >
+                  Zobacz preferencje 🔍
+                </button>
+              </div>
+            )}
+
+            {step === "preferences" && currentUser && (
+              <div
+                key="preferences"
+                className="flex flex-col items-center justify-center h-full text-center space-y-6 py-8 animate-fade-in-up"
+              >
+                <div className="text-6xl animate-float">🔍</div>
+                <h2 className="text-2xl text-purple-600">
+                  Macierz Preferencji
+                </h2>
+                <p className="text-text-dark/70 max-w-xs">
+                  Po prawej widzisz macierz P - czego każdy użytkownik szuka u
+                  potencjalnego partnera.
                 </p>
                 <button
                   onClick={handleStartSwiping}
                   className="
                     mt-4 py-4 px-8 rounded-xl font-semibold text-lg
-                    bg-gradient-romantic text-white shadow-romantic
-                    hover:shadow-lg hover:scale-105 active:scale-95
+                    bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg
+                    hover:shadow-xl hover:scale-105 active:scale-95
                     transition-all duration-300
                   "
                 >
@@ -188,8 +220,10 @@ function App() {
                 step === "swiping" && hasUserSwiped
                   ? "Macierz Polubień"
                   : step === "swiping"
-                  ? "Macierz Podobieństwa"
-                  : "Macierz Zainteresowań"
+                  ? "Macierz Dopasowań"
+                  : step === "preferences"
+                  ? "Macierz Preferencji"
+                  : "Macierz Użytkownik-Cecha"
               }
             >
               {step === "register" && (
@@ -202,7 +236,7 @@ function App() {
               {step === "welcome" && (
                 <div className="space-y-4">
                   <p className="text-sm text-text-dark/70">
-                    Macierz pokazuje zainteresowania wszystkich użytkowników.
+                    Macierz A pokazuje zainteresowania wszystkich użytkowników.
                     <br />
                     <strong>1</strong> = lubi przedmiot, <strong>0</strong> =
                     nie lubi
@@ -214,8 +248,15 @@ function App() {
                 </div>
               )}
 
+              {step === "preferences" && currentUser && (
+                <PreferenceMatrix
+                  users={allUsers}
+                  highlightUserId={currentUser.id}
+                />
+              )}
+
               {step === "swiping" && currentUser && !hasUserSwiped && (
-                <SimilarityMatrix
+                <CombinedMatrix
                   users={allUsers}
                   currentUserId={currentUser.id}
                   highlightedUserId={currentCandidate?.user.id}
@@ -240,7 +281,9 @@ function App() {
                 ? "Macierz Polubień"
                 : step === "swiping"
                 ? "Macierz Podobieństwa"
-                : "Macierz Zainteresowań"
+                : step === "preferences"
+                ? "Macierz Preferencji"
+                : "Macierz Użytkownik-Cecha"
             }
             changeCount={panelChangeCount}
           >
@@ -254,7 +297,7 @@ function App() {
             {step === "welcome" && (
               <div className="space-y-4">
                 <p className="text-sm text-text-dark/70">
-                  Macierz pokazuje zainteresowania wszystkich użytkowników.
+                  Macierz A pokazuje zainteresowania wszystkich użytkowników.
                   <br />
                   <strong>1</strong> = lubi przedmiot, <strong>0</strong> = nie
                   lubi
@@ -266,8 +309,15 @@ function App() {
               </div>
             )}
 
+            {step === "preferences" && currentUser && (
+              <PreferenceMatrix
+                users={allUsers}
+                highlightUserId={currentUser.id}
+              />
+            )}
+
             {step === "swiping" && currentUser && !hasUserSwiped && (
-              <SimilarityMatrix
+              <CombinedMatrix
                 users={allUsers}
                 currentUserId={currentUser.id}
                 highlightedUserId={currentCandidate?.user.id}

@@ -3,7 +3,7 @@ import { SwipeableCard } from "./SwipeableCard";
 
 import type { MatchResult } from "../../utils";
 interface MatchProposalProps {
-  matchResult: MatchResult;
+  matchResult: MatchResult & { matchScore: number };
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
 }
@@ -13,8 +13,10 @@ export function MatchProposal({
   onSwipeLeft,
   onSwipeRight,
 }: MatchProposalProps) {
-  const { user, similarity } = matchResult;
-  const matchPercentage = Math.round((similarity / 8) * 100); // 8 = liczba przedmiotów
+  const { user, matchScore } = matchResult;
+  // matchScore = ile cech kandydata pasuje do moich preferencji
+  // Dzielimy przez liczbę moich preferencji (max 3 w tym przykładzie) lub przez 3 jako bazę
+  const matchPercentage = Math.round((matchScore / 3) * 100);
 
   return (
     <SwipeableCard onSwipeLeft={onSwipeLeft} onSwipeRight={onSwipeRight}>

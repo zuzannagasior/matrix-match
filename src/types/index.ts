@@ -14,7 +14,8 @@ export interface User {
   id: string;
   name: string;
   avatar: string; // identyfikator avatara
-  interests: string[]; // lista ID przedmiotów
+  interests: string[]; // lista ID przedmiotów - co mam
+  preferences: string[]; // lista ID przedmiotów - czego szukam u partnera
   createdAt: number;
 }
 
